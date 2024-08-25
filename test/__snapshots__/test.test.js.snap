@@ -1,0 +1,11 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin single simple component without import 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => <div>check</div>);"
+`;
+
+exports[`Mobx Observer Babel Plugin single simple component with import 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));"
+`;

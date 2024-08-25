@@ -4,11 +4,22 @@ export const plugin = function(babel) {
     visitor: {
       Program: {
         enter(path) {
-          const importDeclaration = t.importDeclaration(
-            [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
-            t.stringLiteral('mobx-react')
+          const observerImport = path.node.body.find(node => 
+            t.isImportDeclaration(node) &&
+            node.source.value === 'mobx-react' &&
+            node.specifiers.some(specifier => 
+              t.isImportSpecifier(specifier) && 
+              specifier.imported.name === 'observer'
+            )
           );
-          path.unshiftContainer('body', importDeclaration);
+
+          if (!observerImport) {
+            const importDeclaration = t.importDeclaration(
+              [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
+              t.stringLiteral('mobx-react')
+            );
+            path.unshiftContainer('body', importDeclaration);
+          }
         }
       },
       FunctionDeclaration(path) {
