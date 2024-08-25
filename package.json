@@ -1,6 +1,7 @@
 {
   "name": "babel-plugin-mobx-observer-on-every-react-component",
   "version": "0.1.0",
+  "type": "module",
   "description": "Wrap literally every React component in an MobX observer higher order component.",
   "keywords": [
     "babel-plugin",
@@ -11,5 +12,12 @@
   "license": "MIT",
   "author": "Tyler Williams",
   "main": "lib/index.js",
-  "repository": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component"
+  "repository": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component",
+  "dependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-react": "^7.24.7"
+  },
+  "scripts": {
+    "test": "node ./test/test.js"
+  }
 }
