@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-mobx-observer-on-every-react-component",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Wrap literally every React component in an MobX observer higher order component.",
   "keywords": [
     "babel-plugin",
@@ -10,21 +10,24 @@
   "bugs": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component/issues",
   "license": "MIT",
   "author": "Tyler Williams",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "module": "src/index.mjs",
   "exports": {
-    ".": {
-      "import": "./src/index.mjs",
-      "require": "./src/index.js"
-    }
+    "import": "./src/index.mjs",
+    "require": "./dist/index.js"
   },
   "files": [
-    "src/index.js",
+    "dist/index.js",
     "src/index.mjs"
   ],
   "repository": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component",
   "devDependencies": {
+    "@babel/cli": "^7.24.8",
     "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7"
+  },
+  "scripts": {
+    "build": "babel src/index.mjs --out-file dist/index.js"
   }
 }
