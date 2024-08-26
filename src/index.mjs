@@ -55,7 +55,6 @@ export const autoObserverPlugin = function(babel) {
 
 function wrapWithObserver(path, t) {
   if (isReactComponent(path) && !isAlreadyWrapped(path, t)) {
-
     let componentNode = path.node;
     let componentName = componentNode.id ? componentNode.id.name : 'AnonymousComponent';
 
@@ -68,6 +67,10 @@ function wrapWithObserver(path, t) {
         componentNode.generator,
         componentNode.async
       );
+
+      // Remove TypeScript-specific properties
+      delete functionExpression.typeParameters;
+      delete functionExpression.returnType;
 
       const observerCall = t.callExpression(
         t.identifier('observer'),
@@ -91,6 +94,11 @@ function wrapWithObserver(path, t) {
         componentNode.decorators
       );
 
+      // Remove TypeScript-specific properties
+      delete classExpression.typeParameters;
+      delete classExpression.superTypeParameters;
+      delete classExpression.implements;
+
       const observerCall = t.callExpression(
         t.identifier('observer'),
         [classExpression]
@@ -110,6 +118,10 @@ function wrapWithObserver(path, t) {
         t.identifier('observer'),
         [componentNode]
       );
+
+      // Remove TypeScript-specific properties
+      delete observerCall.arguments[0].typeParameters;
+      delete observerCall.arguments[0].returnType;
 
       if (path.parentPath.isVariableDeclarator()) {
         path.replaceWith(observerCall);
