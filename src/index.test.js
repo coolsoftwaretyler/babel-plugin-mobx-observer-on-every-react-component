@@ -91,18 +91,33 @@ describe("Mobx Observer Babel Plugin", () => {
     describe('when there are additional imports', () => {
       test('it leaves the other imports alone', () => {
         const testinput = `import { types } from "mobx-state-tree";
-        const Simple = observer(() => <div>check</div>);`
+        const Simple = () => <div>check</div>;`
         const out = runTransform(testinput);
 
         expect(out.code).toMatchSnapshot();
       })
+    })
+
+    describe('when there is no react component at all', () => {
+        test('it leaves the code unchanged', () => {
+            const testinput = `const Simple = (a, b) => a + b
+            const obj = {
+                a: 1,
+                b: 2,
+                c: 3
+            }
+            `
+            const out = runTransform(testinput);
+
+            expect(out.code).toMatchSnapshot();
+        })
     })
   })
   describe('when there is a mobx-react import', () => {
     describe('for a single arrow function component', () => {
       test('it leaves the import alone and wraps the component', () => {
         const testinput = `import { observer } from "mobx-react";
-        const Simple = observer(() => <div>check</div>);`
+        const Simple = () => <div>check</div>;`
         const out = runTransform(testinput);
 
         expect(out.code).toMatchSnapshot();
@@ -112,8 +127,8 @@ describe("Mobx Observer Babel Plugin", () => {
     describe('for multiple arrow function components', () => {
       test('it imports observer and wraps both components', () => {
         const testinput = `import { observer } from "mobx-react";
-        const Simple = observer(() => <div>check</div>);
-        const Simple2 = observer(() => <div>check</div>);`
+        const Simple = () => <div>check</div>;
+        const Simple2 = () => <div>check</div>;`
         const out = runTransform(testinput);
 
         expect(out.code).toMatchSnapshot();
@@ -187,7 +202,7 @@ describe("Mobx Observer Babel Plugin", () => {
       test('it leaves the other imports alone', () => {
         const testinput = `import { types } from "mobx-state-tree";
         import { observer } from "mobx-react";
-        const Simple = observer(() => <div>check</div>);`
+        const Simple = () => <div>check</div>;`
         const out = runTransform(testinput);
 
         expect(out.code).toMatchSnapshot();

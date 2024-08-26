@@ -3,22 +3,37 @@ export const autoObserverPlugin = function(babel) {
   return {
     visitor: {
       Program: {
-        enter(path) {
-          const observerImport = path.node.body.find(node => 
-            t.isImportDeclaration(node) &&
-            node.source.value === 'mobx-react' &&
-            node.specifiers.some(specifier => 
-              t.isImportSpecifier(specifier) && 
-              specifier.imported.name === 'observer'
-            )
-          );
+        exit(path) {
+          // Check if any React component exists in the program
+          const hasReactComponent = path.node.body.some(node => {
+            if (t.isFunctionDeclaration(node) || t.isClassDeclaration(node)) {
+              return isReactComponent(path.get(`body.${path.node.body.indexOf(node)}`));
+            } else if (t.isVariableDeclaration(node)) {
+              return node.declarations.some((decl, index) => 
+                t.isVariableDeclarator(decl) && 
+                isReactComponentOrObserved(path.get(`body.${path.node.body.indexOf(node)}.declarations.${index}.init`))
+              );
+            }
+            return false;
+          });
 
-          if (!observerImport) {
-            const importDeclaration = t.importDeclaration(
-              [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
-              t.stringLiteral('mobx-react')
+          if (hasReactComponent) {
+            const observerImport = path.node.body.find(node => 
+              t.isImportDeclaration(node) &&
+              node.source.value === 'mobx-react' &&
+              node.specifiers.some(specifier => 
+                t.isImportSpecifier(specifier) && 
+                specifier.imported.name === 'observer'
+              )
             );
-            path.unshiftContainer('body', importDeclaration);
+
+            if (!observerImport) {
+              const importDeclaration = t.importDeclaration(
+                [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
+                t.stringLiteral('mobx-react')
+              );
+              path.unshiftContainer('body', importDeclaration);
+            }
           }
         }
       },
@@ -167,4 +182,11 @@ function isJSXOrReactCreateElement(path) {
           path.get("callee").isMemberExpression() && 
           path.get("callee.object").isIdentifier({ name: "React" }) && 
           path.get("callee.property").isIdentifier({ name: "createElement" }));
+}
+
+function isReactComponentOrObserved(path) {
+  if (path.isCallExpression() && path.get('callee').isIdentifier({ name: 'observer' })) {
+    return true;
+  }
+  return isReactComponent(path);
 }
