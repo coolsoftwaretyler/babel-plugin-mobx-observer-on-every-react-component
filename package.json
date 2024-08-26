@@ -11,13 +11,13 @@
   "bugs": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component/issues",
   "license": "MIT",
   "author": "Tyler Williams",
-  "main": "lib/index.js",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "repository": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component",
-  "dependencies": {
+  "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-react": "^7.24.7"
-  },
-  "scripts": {
-    "test": "node ./test/test.js"
   }
 }
