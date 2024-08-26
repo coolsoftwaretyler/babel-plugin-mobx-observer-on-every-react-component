@@ -190,3 +190,5 @@ function isReactComponentOrObserved(path) {
   }
   return isReactComponent(path);
 }
+
+export default autoObserverPlugin;

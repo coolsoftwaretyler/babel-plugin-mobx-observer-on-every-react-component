@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-mobx-observer-on-every-react-component",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Wrap literally every React component in an MobX observer higher order component.",
   "keywords": [
     "babel-plugin",
@@ -13,8 +13,11 @@
   "main": "dist/index.js",
   "module": "src/index.mjs",
   "exports": {
-    "import": "./src/index.mjs",
-    "require": "./dist/index.js"
+    ".": {
+      "import": "./src/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
     "dist/index.js",
