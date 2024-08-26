@@ -1,0 +1,149 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for a single arrow function component it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => <div>check</div>);"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for multiple arrow function components it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => <div>check</div>);
+const Simple2 = observer(() => <div>check</div>);"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for a single functional declaration it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function Simple() {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for multiple functional declarations it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function Simple() {
+  return <div>check</div>;
+});
+const Simple2 = observer(function Simple2() {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for a single function expression it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function () {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for multiple function expressions it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function () {
+  return <div>check</div>;
+});
+const Simple2 = observer(function () {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for a single class declaration it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(class Simple extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import for multiple class declarations it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(class Simple extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});
+const Simple2 = observer(class Simple2 extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is no mobx-react import when there are additional imports it leaves the other imports alone 1`] = `
+"import { observer } from "mobx-react";
+import { types } from "mobx-state-tree";
+const Simple = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for a single arrow function component it leaves the import alone and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for multiple arrow function components it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));
+const Simple2 = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for a single functional declaration it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function Simple() {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for multiple functional declarations it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function Simple() {
+  return <div>check</div>;
+});
+const Simple2 = observer(function Simple2() {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for a single function expression it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function () {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for multiple function expressions it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(function () {
+  return <div>check</div>;
+});
+const Simple2 = observer(function () {
+  return <div>check</div>;
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for a single class declaration it imports observer and wraps the component 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(class Simple extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import for multiple class declarations it imports observer and wraps both components 1`] = `
+"import { observer } from "mobx-react";
+const Simple = observer(class Simple extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});
+const Simple2 = observer(class Simple2 extends React.Component {
+  render() {
+    return <div>check</div>;
+  }
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin when there is a mobx-react import when there are additional imports it leaves the other imports alone 1`] = `
+"import { types } from "mobx-state-tree";
+import { observer } from "mobx-react";
+const Simple = observer(() => /*#__PURE__*/React.createElement("div", null, "check"));"
+`;

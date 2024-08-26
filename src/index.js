@@ -1,4 +1,4 @@
-export const plugin = function(babel) {
+export const autoObserverPlugin = function(babel) {
   const t = babel.types;
   return {
     visitor: {
@@ -40,26 +40,76 @@ export const plugin = function(babel) {
 
 function wrapWithObserver(path, t) {
   if (isReactComponent(path) && !isAlreadyWrapped(path, t)) {
-    console.log('Wrapping React Component:', path.node.id ? path.node.id.name : 'Anonymous');
 
-    const observerCall = t.callExpression(
-      t.identifier('observer'),
-      [path.node]
-    );
+    let componentNode = path.node;
+    let componentName = componentNode.id ? componentNode.id.name : 'AnonymousComponent';
 
-    if (path.parentPath.isVariableDeclarator()) {
-      path.replaceWith(observerCall);
-    } else if (path.parentPath.isExportDefaultDeclaration() || path.parentPath.isExportNamedDeclaration()) {
-      path.replaceWith(observerCall);
-    } else {
+    if (path.isFunctionDeclaration()) {
+      // For function declarations
+      const functionExpression = t.functionExpression(
+        t.identifier(componentName),
+        componentNode.params,
+        componentNode.body,
+        componentNode.generator,
+        componentNode.async
+      );
+
+      const observerCall = t.callExpression(
+        t.identifier('observer'),
+        [functionExpression]
+      );
+
       path.replaceWith(
         t.variableDeclaration('const', [
           t.variableDeclarator(
-            path.node.id || t.identifier('AnonymousComponent'),
+            t.identifier(componentName),
             observerCall
           )
         ])
       );
+    } else if (path.isClassDeclaration()) {
+      // For class declarations
+      const classExpression = t.classExpression(
+        t.identifier(componentName),
+        componentNode.superClass,
+        componentNode.body,
+        componentNode.decorators
+      );
+
+      const observerCall = t.callExpression(
+        t.identifier('observer'),
+        [classExpression]
+      );
+
+      path.replaceWith(
+        t.variableDeclaration('const', [
+          t.variableDeclarator(
+            t.identifier(componentName),
+            observerCall
+          )
+        ])
+      );
+    } else {
+      // Existing logic for other component types
+      const observerCall = t.callExpression(
+        t.identifier('observer'),
+        [componentNode]
+      );
+
+      if (path.parentPath.isVariableDeclarator()) {
+        path.replaceWith(observerCall);
+      } else if (path.parentPath.isExportDefaultDeclaration() || path.parentPath.isExportNamedDeclaration()) {
+        path.replaceWith(observerCall);
+      } else {
+        path.replaceWith(
+          t.variableDeclaration('const', [
+            t.variableDeclarator(
+              t.identifier(componentName),
+              observerCall
+            )
+          ])
+        );
+      }
     }
 
     path.skip();
