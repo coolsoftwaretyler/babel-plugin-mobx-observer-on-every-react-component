@@ -8,7 +8,9 @@ exports[`Mobx Observer Babel Plugin function declaration when it is not a React 
 
 exports[`Mobx Observer Babel Plugin function declaration when it is a React component when it is not wrapped in observer it wraps the component in observer 1`] = `
 "import { observer } from "mobx-react";
-observer(function MyComponentDeclaration() {
-  return /*#__PURE__*/React.createElement("div", null, "Hello World");
-});"
+function MyComponentDeclaration() {
+  return observer(function MyComponentDeclaration() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  });
+}"
 `;
