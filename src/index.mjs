@@ -4,9 +4,7 @@ export const autoObserverPlugin = function (babel) {
     name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
       Program(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
+        if (isInNodeModules(state)) {
           return;
         }
 
@@ -58,9 +56,7 @@ export const autoObserverPlugin = function (babel) {
       },
 
       ArrowFunctionExpression(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
+        if (isInNodeModules(state)) {
           return;
         }
 
@@ -91,9 +87,7 @@ export const autoObserverPlugin = function (babel) {
         }
       },
       ClassDeclaration(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
+        if (isInNodeModules(state)) {
           return;
         }
 
@@ -140,11 +134,10 @@ export const autoObserverPlugin = function (babel) {
         }
       },
       ClassExpression(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
+        if (isInNodeModules(state)) {
           return;
         }
+
         if (isReactComponent(path)) {
           console.log(
             "hasReactComponent class expression",
@@ -189,10 +182,7 @@ export const autoObserverPlugin = function (babel) {
         }
       },
       FunctionDeclaration(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
-          console.log("This is a node module", filename);
+        if (isInNodeModules(state)) {
           return;
         }
 
@@ -219,18 +209,14 @@ export const autoObserverPlugin = function (babel) {
             functionExpression,
           ]);
 
-
           // Create a new FunctionDeclaration with the same id and the observer-wrapped body
           const newFunctionDeclaration = t.functionDeclaration(
             functionId,
             path.node.params,
-            t.blockStatement([
-              t.returnStatement(observerFunction)
-            ]),
+            t.blockStatement([t.returnStatement(observerFunction)]),
             path.node.generator,
             path.node.async
           );
-
 
           // Replace the old function declaration with the new one
           path.replaceWith(newFunctionDeclaration);
@@ -239,9 +225,7 @@ export const autoObserverPlugin = function (babel) {
         }
       },
       FunctionExpression(path, state) {
-        const filename = state.file.opts.filename;
-
-        if (filename && filename.includes("node_modules")) {
+        if (isInNodeModules(state)) {
           return;
         }
 
@@ -290,6 +274,11 @@ export const autoObserverPlugin = function (babel) {
     },
   };
 };
+
+function isInNodeModules(state) {
+  const filename = state.file.opts.filename;
+  return filename && filename.includes("node_modules");
+}
 
 function isReactComponent(path) {
   console.log("isReactComponent: path node type", path.node.type);
