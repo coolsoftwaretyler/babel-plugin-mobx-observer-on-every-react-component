@@ -65,10 +65,7 @@ export const autoObserverPlugin = function (babel) {
         if (isReactComponent(path)) {
           console.log("is react component");
           // Check to see if this is already wrapped in observer
-          if (
-            path.parentPath.node.type === "CallExpression" &&
-            path.parentPath.node.callee.name === "observer"
-          ) {
+          if (isWrappedInObserver(path)) {
             console.log("already wrapped in observer");
             return;
           } else {
@@ -97,10 +94,7 @@ export const autoObserverPlugin = function (babel) {
             path.node.id?.name ?? "Anonymous"
           );
           // Check to see if this is already wrapped in observer
-          if (
-            path.parentPath.node.type === "CallExpression" &&
-            path.parentPath.node.callee.name === "observer"
-          ) {
+          if (isWrappedInObserver(path)) {
             console.log(
               "already wrapped in observer",
               path.node.id?.name ?? "Anonymous"
@@ -111,20 +105,8 @@ export const autoObserverPlugin = function (babel) {
               "not wrapped in observer",
               path.node.id?.name ?? "Anonymous"
             );
-            const classExpression = t.classExpression(
-              path.node.id,
-              path.node.superClass,
-              path.node.body,
-              path.node.decorators
-            );
-            // Wrap the ClassDeclaration with observer()
-            const observerFunction = t.callExpression(
-              t.identifier("observer"),
-              [classExpression]
-            );
 
-            // Replace the ClassDeclaration with the observer() wrapped version
-            path.replaceWith(observerFunction);
+            wrapClassInObserver(path, t);
           }
         } else {
           console.log(
@@ -145,10 +127,7 @@ export const autoObserverPlugin = function (babel) {
           );
 
           // Check to see if this is already wrapped in observer
-          if (
-            path.parentPath.node.type === "CallExpression" &&
-            path.parentPath.node.callee.name === "observer"
-          ) {
+          if (isWrappedInObserver(path)) {
             console.log(
               "already wrapped in observer",
               path.node.id?.name ?? "Anonymous"
@@ -159,20 +138,8 @@ export const autoObserverPlugin = function (babel) {
               "not wrapped in observer",
               path.node.id?.name ?? "Anonymous"
             );
-            const classExpression = t.classExpression(
-              path.node.id,
-              path.node.superClass,
-              path.node.body,
-              path.node.decorators
-            );
-            // Wrap the ClassDeclaration with observer()
-            const observerFunction = t.callExpression(
-              t.identifier("observer"),
-              [classExpression]
-            );
 
-            // Replace the ClassDeclaration with the observer() wrapped version
-            path.replaceWith(observerFunction);
+            wrapClassInObserver(path, t);
           }
         } else {
           console.log(
@@ -193,6 +160,12 @@ export const autoObserverPlugin = function (babel) {
             "hasReactComponent function declaration",
             path.node.id.name
           );
+
+          if (isWrappedInObserver(path)) {
+            console.log("already wrapped in observer", path.node.id?.name ?? "Anonymous");
+            return;
+          }
+
           const functionId = path.node.id;
 
           // Create a FunctionExpression with the same name, params, and body
@@ -241,10 +214,7 @@ export const autoObserverPlugin = function (babel) {
           );
 
           // Check to see if this is already wrapped in observer
-          if (
-            path.parentPath.node.type === "CallExpression" &&
-            path.parentPath.node.callee.name === "observer"
-          ) {
+          if (isWrappedInObserver(path)) {
             console.log(
               "already wrapped in observer",
               path.node.id?.name ?? "Anonymous"
@@ -278,6 +248,30 @@ export const autoObserverPlugin = function (babel) {
 function isInNodeModules(state) {
   const filename = state.file.opts.filename;
   return filename && filename.includes("node_modules");
+}
+
+function isWrappedInObserver(path) {
+  return (
+    path.parentPath.node.type === "CallExpression" &&
+    path.parentPath.node.callee.name === "observer"
+  );
+}
+
+function wrapClassInObserver(path, t) {
+  const classExpression = t.classExpression(
+    path.node.id,
+    path.node.superClass,
+    path.node.body,
+    path.node.decorators
+  );
+  // Wrap the ClassDeclaration with observer()
+  const observerFunction = t.callExpression(
+    t.identifier("observer"),
+    [classExpression]
+  );
+
+  // Replace the ClassDeclaration with the observer() wrapped version
+  path.replaceWith(observerFunction);
 }
 
 function isReactComponent(path) {
