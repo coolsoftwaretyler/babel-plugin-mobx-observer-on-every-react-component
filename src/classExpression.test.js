@@ -14,7 +14,7 @@ describe("Mobx Observer Babel Plugin", () => {
   describe("class declarations", () => {
     describe("when it is not a React component", () => {
       test("it does nothing", () => {
-        const source = `class MyComponentClass {}`;
+        const source = `const MyRegularClass = class MyRegularClass {}`;
         const out = runTransform(source);
 
         expect(out.code).toMatchSnapshot();
@@ -23,7 +23,7 @@ describe("Mobx Observer Babel Plugin", () => {
     describe("when it is a React component", () => {
       describe("and it is already wrapped in observer", () => {
         test("it does nothing", () => {
-          const source = `observer(class MyComponent { render() { return <div>Hello World</div>; } })`;
+          const source = `const MyComponent = observer(class MyComponent { render() { return <div>Hello World</div>; } })`;
           const out = runTransform(source);
 
           expect(out.code).toMatchSnapshot();
@@ -31,7 +31,7 @@ describe("Mobx Observer Babel Plugin", () => {
       });
       describe("and it is not wrapped in observer", () => {
         test("it wraps the component in observer", () => {
-          const source = `class MyComponent { render() { return <div>Hello World</div>; } }`;
+          const source = `const MyComponent = class MyComponent { render() { return <div>Hello World</div>; } }`;
           const out = runTransform(source);
 
           expect(out.code).toMatchSnapshot();

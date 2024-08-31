@@ -75,27 +75,80 @@ export const autoObserverPlugin = function (babel) {
           console.log("not a react component");
         }
       },
-      // ClassDeclaration(path, state) {
-      //   const filename = state.file.opts.filename;
+      ClassDeclaration(path, state) {
+        const filename = state.file.opts.filename;
 
-      //   if (filename && filename.includes("node_modules")) {
-      //     return;
-      //   }
+        if (filename && filename.includes("node_modules")) {
+          return;
+        }
 
-      //   if (isReactComponent(path)) {
-      //     console.log("hasReactComponent class", path.hub.file.opts.filename);
-      //   }
-      // },
-      // ClassExpression(path, state) {
-      //   const filename = state.file.opts.filename;
+        if (isReactComponent(path)) {
+          console.log("hasReactComponent class", path.node.id?.name ?? 'Anonymous');
+          // Check to see if this is already wrapped in observer
+          if (
+            path.parentPath.node.type === "CallExpression" &&
+            path.parentPath.node.callee.name === "observer"
+          ) {
+            console.log("already wrapped in observer", path.node.id?.name ?? 'Anonymous');
+            return;
+          } else {
+            console.log("not wrapped in observer", path.node.id?.name ?? 'Anonymous');
+            const classExpression = t.classExpression(
+              path.node.id,
+              path.node.superClass,
+              path.node.body,
+              path.node.decorators
+            );
+            // Wrap the ClassDeclaration with observer()
+            const observerFunction = t.callExpression(
+              t.identifier("observer"),
+              [classExpression]
+            );
 
-      //   if (filename && filename.includes('node_modules')) {
-      //     return;
-      //   }
-      //   if (isReactComponent(path)) {
-      //     console.log('hasReactComponent class expression', path.hub.file.opts.filename);
-      //   }
-      // },
+            // Replace the ClassDeclaration with the observer() wrapped version
+            path.replaceWith(observerFunction);
+          }
+        } else {
+          console.log("not a react component class", path.node.id?.name ?? 'Anonymous')
+        }
+      },
+      ClassExpression(path, state) {
+        const filename = state.file.opts.filename;
+
+        if (filename && filename.includes('node_modules')) {
+          return;
+        }
+        if (isReactComponent(path)) {
+          console.log('hasReactComponent class expression', path.hub.file.opts.filename);
+
+        // Check to see if this is already wrapped in observer
+        if (
+          path.parentPath.node.type === "CallExpression" &&
+          path.parentPath.node.callee.name === "observer"
+        ) {
+          console.log("already wrapped in observer", path.node.id?.name ?? 'Anonymous');
+          return;
+        } else {
+          console.log("not wrapped in observer", path.node.id?.name ?? 'Anonymous');
+          const classExpression = t.classExpression(
+            path.node.id,
+            path.node.superClass,
+            path.node.body,
+            path.node.decorators
+          );
+          // Wrap the ClassDeclaration with observer()
+          const observerFunction = t.callExpression(
+            t.identifier("observer"),
+            [classExpression]
+          );
+
+          // Replace the ClassDeclaration with the observer() wrapped version
+          path.replaceWith(observerFunction);
+        }; 
+        } else {
+          console.log('not a react component class expression', path.hub.file.opts.filename);
+        }
+      },
       FunctionDeclaration(path, state) {
         const filename = state.file.opts.filename;
 
