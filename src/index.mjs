@@ -3,44 +3,41 @@ export const autoObserverPlugin = function (babel) {
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
-      // Program(path, state) {
-      //   console.log(path)
-      // },
-      // Program(path, state) {
-      //   const filename = state.file.opts.filename;
+      Program(path, state) {
+        const filename = state.file.opts.filename;
 
-      //   if (filename && filename.includes('node_modules')) {
-      //     return;
-      //   }
+        if (filename && filename.includes('node_modules')) {
+          return;
+        }
 
-      //   let hasReactComponent = false;
+        let hasReactComponent = false;
 
-      //   path.traverse({
-      //     'ArrowFunctionExpression|FunctionDeclaration|FunctionExpression|ClassDeclaration|ClassExpression'(path) {
-      //       if (isReactComponent(path)) {
-      //         hasReactComponent = true;
-      //         // Check to see if we have imported observer from mobx-react
-      //         const hasObserverImport = path.hub.file.code.includes('import { observer } from "mobx-react"');
-      //         if (!hasObserverImport) {
-      //           console.log('no observer import in this file, adding one', path.hub.file.opts.filename);
-      //           // Add the import statement
-      //           const importStatement = t.importDeclaration(
-      //             [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
-      //             t.stringLiteral('mobx-react')
-      //           );
+        path.traverse({
+          'ArrowFunctionExpression|FunctionDeclaration|FunctionExpression|ClassDeclaration|ClassExpression'(path) {
+            if (isReactComponent(path)) {
+              hasReactComponent = true;
+              // Check to see if we have imported observer from mobx-react
+              const hasObserverImport = path.hub.file.code.includes('import { observer } from "mobx-react"');
+              if (!hasObserverImport) {
+                console.log('no observer import in this file, adding one', path.hub.file.opts.filename);
+                // Add the import statement
+                const importStatement = t.importDeclaration(
+                  [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
+                  t.stringLiteral('mobx-react')
+                );
 
-      //           path.hub.file.path.node.body.unshift(importStatement);
-      //         } else {
-      //           console.log('has observer import in this file', path.hub.file.opts.filename);
-      //         }
-      //       }
-      //     }
-      //   });
+                path.hub.file.path.node.body.unshift(importStatement);
+              } else {
+                console.log('has observer import in this file', path.hub.file.opts.filename);
+              }
+            }
+          }
+        });
 
-      //   if (!hasReactComponent) {
-      //     console.log('no react components in this file', path.hub.file.opts.filename);
-      //   }
-      // },
+        if (!hasReactComponent) {
+          console.log('no react components in this file', path.hub.file.opts.filename);
+        }
+      },
 
       ArrowFunctionExpression(path, state) {
         const filename = state.file.opts.filename;

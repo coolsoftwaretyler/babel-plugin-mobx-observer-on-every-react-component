@@ -7,33 +7,41 @@ exports[`Mobx Observer Babel Plugin function expression when it is not a React c
 `;
 
 exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is anonymous it does nothing 1`] = `
-"const MyAnonymousObserver = observer(function () {
+"import { observer } from "mobx-react";
+const MyAnonymousObserver = observer(function () {
   return /*#__PURE__*/React.createElement("div", null, "Hello World");
 });"
 `;
 
-exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is an arrow function it does nothing 1`] = `"const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));"`;
+exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is an arrow function it does nothing 1`] = `
+"import { observer } from "mobx-react";
+const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));"
+`;
 
 exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is named it does nothing 1`] = `
-"const MyNamedObserver = observer(function MyNamedFunction() {
+"import { observer } from "mobx-react";
+const MyNamedObserver = observer(function MyNamedFunction() {
   return /*#__PURE__*/React.createElement("div", null, "Hello World");
 });"
 `;
 
 exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer it does nothing 1`] = `
-"observer(function MyComponentExpression() {
+"import { observer } from "mobx-react";
+observer(function MyComponentExpression() {
   return /*#__PURE__*/React.createElement("div", null, "Hello World");
 });"
 `;
 
 exports[`Mobx Observer Babel Plugin function expression when the component is not wrapped in observer when the function is anonymous it wraps the component in observer 1`] = `
-"const MyAnonymousObserver = observer(function () {
+"import { observer } from "mobx-react";
+const MyAnonymousObserver = observer(function () {
   return /*#__PURE__*/React.createElement("div", null, "Hello World");
 });"
 `;
 
 exports[`Mobx Observer Babel Plugin function expression when the component is not wrapped in observer when the function is named it wraps the component in observer 1`] = `
-"const MyNamedObserver = observer(function MyNamedFunction() {
+"import { observer } from "mobx-react";
+const MyNamedObserver = observer(function MyNamedFunction() {
   return /*#__PURE__*/React.createElement("div", null, "Hello World");
 });"
 `;

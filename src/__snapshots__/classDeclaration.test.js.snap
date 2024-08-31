@@ -3,7 +3,8 @@
 exports[`Mobx Observer Babel Plugin class declarations when it is not a React component it does nothing 1`] = `"class MyComponentClass {}"`;
 
 exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is already wrapped in observer it does nothing 1`] = `
-"observer(class MyComponent {
+"import { observer } from "mobx-react";
+observer(class MyComponent {
   render() {
     return /*#__PURE__*/React.createElement("div", null, "Hello World");
   }
@@ -11,7 +12,8 @@ exports[`Mobx Observer Babel Plugin class declarations when it is a React compon
 `;
 
 exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is not wrapped in observer it wraps the component in observer 1`] = `
-"observer(class MyComponent {
+"import { observer } from "mobx-react";
+observer(class MyComponent {
   render() {
     return /*#__PURE__*/React.createElement("div", null, "Hello World");
   }
