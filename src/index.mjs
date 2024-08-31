@@ -1,206 +1,246 @@
-export const autoObserverPlugin = function(babel) {
+export const autoObserverPlugin = function (babel) {
   const t = babel.types;
   return {
+    name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
-      Program: {
-        exit(path) {
-          // Check if any React component exists in the program
-          const hasReactComponent = path.node.body.some(node => {
-            if (t.isFunctionDeclaration(node) || t.isClassDeclaration(node)) {
-              return isReactComponent(path.get(`body.${path.node.body.indexOf(node)}`));
-            } else if (t.isVariableDeclaration(node)) {
-              return node.declarations.some((decl, index) => 
-                t.isVariableDeclarator(decl) && 
-                isReactComponentOrObserved(path.get(`body.${path.node.body.indexOf(node)}.declarations.${index}.init`))
-              );
-            }
-            return false;
-          });
+      // Program(path, state) {
+      //   console.log(path)
+      // },
+      // Program(path, state) {
+      //   const filename = state.file.opts.filename;
 
-          if (hasReactComponent) {
-            const observerImport = path.node.body.find(node => 
-              t.isImportDeclaration(node) &&
-              node.source.value === 'mobx-react' &&
-              node.specifiers.some(specifier => 
-                t.isImportSpecifier(specifier) && 
-                specifier.imported.name === 'observer'
-              )
+      //   if (filename && filename.includes('node_modules')) {
+      //     return;
+      //   }
+
+      //   let hasReactComponent = false;
+
+      //   path.traverse({
+      //     'ArrowFunctionExpression|FunctionDeclaration|FunctionExpression|ClassDeclaration|ClassExpression'(path) {
+      //       if (isReactComponent(path)) {
+      //         hasReactComponent = true;
+      //         // Check to see if we have imported observer from mobx-react
+      //         const hasObserverImport = path.hub.file.code.includes('import { observer } from "mobx-react"');
+      //         if (!hasObserverImport) {
+      //           console.log('no observer import in this file, adding one', path.hub.file.opts.filename);
+      //           // Add the import statement
+      //           const importStatement = t.importDeclaration(
+      //             [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
+      //             t.stringLiteral('mobx-react')
+      //           );
+
+      //           path.hub.file.path.node.body.unshift(importStatement);
+      //         } else {
+      //           console.log('has observer import in this file', path.hub.file.opts.filename);
+      //         }
+      //       }
+      //     }
+      //   });
+
+      //   if (!hasReactComponent) {
+      //     console.log('no react components in this file', path.hub.file.opts.filename);
+      //   }
+      // },
+
+      ArrowFunctionExpression(path, state) {
+        const filename = state.file.opts.filename;
+
+        if (filename && filename.includes("node_modules")) {
+          return;
+        }
+
+        console.log("arrow function expression", path.hub.file.opts.filename);
+
+        if (isReactComponent(path)) {
+          console.log("is react component");
+          // Check to see if this is already wrapped in observer
+          if (
+            path.parentPath.node.type === "CallExpression" &&
+            path.parentPath.node.callee.name === "observer"
+          ) {
+            console.log("already wrapped in observer");
+            return;
+          } else {
+            console.log("not wrapped in observer");
+            // Wrap the ArrowFunctionExpression with observer()
+            const observerFunction = t.callExpression(
+              t.identifier("observer"),
+              [path.node]
             );
 
-            if (!observerImport) {
-              const importDeclaration = t.importDeclaration(
-                [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
-                t.stringLiteral('mobx-react')
-              );
-              path.unshiftContainer('body', importDeclaration);
-            }
+            // Replace the ArrowFunctionExpression with the observer() wrapped version
+            path.replaceWith(observerFunction);
           }
+        } else {
+          console.log("not a react component");
         }
       },
-      FunctionDeclaration(path) {
-        wrapWithObserver(path, t);
+      // ClassDeclaration(path, state) {
+      //   const filename = state.file.opts.filename;
+
+      //   if (filename && filename.includes("node_modules")) {
+      //     return;
+      //   }
+
+      //   if (isReactComponent(path)) {
+      //     console.log("hasReactComponent class", path.hub.file.opts.filename);
+      //   }
+      // },
+      // ClassExpression(path, state) {
+      //   const filename = state.file.opts.filename;
+
+      //   if (filename && filename.includes('node_modules')) {
+      //     return;
+      //   }
+      //   if (isReactComponent(path)) {
+      //     console.log('hasReactComponent class expression', path.hub.file.opts.filename);
+      //   }
+      // },
+      FunctionDeclaration(path, state) {
+        const filename = state.file.opts.filename;
+
+        if (filename && filename.includes("node_modules")) {
+          console.log("This is a node module", filename);
+          return;
+        }
+
+        console.log("checking function declaration", path.node.id.name);
+
+        if (isReactComponent(path)) {
+          console.log(
+            "hasReactComponent function declaration",
+            path.node.id.name
+          );
+
+          /**
+           * A react Function Declaration specifically won't have an observer wrapper. If it did, it would be a function expression. So let's update it to be like
+           * observer(function MyComponent() { return <div>Hello World</div>; });
+           */
+          // Convert the FunctionDeclaration to a FunctionExpression
+          const functionExpression = t.functionExpression(
+            path.node.id,
+            path.node.params,
+            path.node.body,
+            path.node.generator,
+            path.node.async
+          );
+
+          // Wrap the FunctionExpression with observer()
+          const observerFunction = t.callExpression(t.identifier("observer"), [
+            functionExpression,
+          ]);
+
+          path.replaceWith(observerFunction);
+        } else {
+          console.log("not a react component", path.node.id.name);
+        }
       },
-      FunctionExpression(path) {
-        wrapWithObserver(path, t);
+      FunctionExpression(path, state) {
+        const filename = state.file.opts.filename;
+
+        if (filename && filename.includes("node_modules")) {
+          return;
+        }
+
+        console.log(
+          "checking function expression",
+          path.node.id?.name ?? "Anonymous"
+        );
+
+        if (isReactComponent(path)) {
+          console.log(
+            "hasReactComponent function expression",
+            path.node.id?.name ?? "Anonymous"
+          );
+
+          // Check to see if this is already wrapped in observer
+          if (
+            path.parentPath.node.type === "CallExpression" &&
+            path.parentPath.node.callee.name === "observer"
+          ) {
+            console.log(
+              "already wrapped in observer",
+              path.node.id?.name ?? "Anonymous"
+            );
+            return;
+          } else {
+            console.log(
+              "not wrapped in observer",
+              path.node.id?.name ?? "Anonymous"
+            );
+            // Wrap the FunctionExpression with observer()
+            const observerFunction = t.callExpression(
+              t.identifier("observer"),
+              [path.node]
+            );
+
+            // Replace the FunctionExpression with the observer() wrapped version
+            path.replaceWith(observerFunction);
+          }
+        } else {
+          console.log(
+            "not a react component",
+            path.node.id?.name ?? "Anonymous"
+          );
+        }
       },
-      ArrowFunctionExpression(path) {
-        wrapWithObserver(path, t);
-      },
-      ClassDeclaration(path) {
-        wrapWithObserver(path, t);
-      }
-    }
+    },
   };
 };
 
-function wrapWithObserver(path, t) {
-  if (isReactComponent(path) && !isAlreadyWrapped(path, t)) {
-    let componentNode = path.node;
-    let componentName = componentNode.id ? componentNode.id.name : 'AnonymousComponent';
-
-    if (path.isFunctionDeclaration()) {
-      // For function declarations
-      const functionExpression = t.functionExpression(
-        t.identifier(componentName),
-        componentNode.params,
-        componentNode.body,
-        componentNode.generator,
-        componentNode.async
-      );
-
-      // Remove TypeScript-specific properties
-      delete functionExpression.typeParameters;
-      delete functionExpression.returnType;
-
-      const observerCall = t.callExpression(
-        t.identifier('observer'),
-        [functionExpression]
-      );
-
-      path.replaceWith(
-        t.variableDeclaration('const', [
-          t.variableDeclarator(
-            t.identifier(componentName),
-            observerCall
-          )
-        ])
-      );
-    } else if (path.isClassDeclaration()) {
-      // For class declarations
-      const classExpression = t.classExpression(
-        t.identifier(componentName),
-        componentNode.superClass,
-        componentNode.body,
-        componentNode.decorators
-      );
-
-      // Remove TypeScript-specific properties
-      delete classExpression.typeParameters;
-      delete classExpression.superTypeParameters;
-      delete classExpression.implements;
-
-      const observerCall = t.callExpression(
-        t.identifier('observer'),
-        [classExpression]
-      );
-
-      path.replaceWith(
-        t.variableDeclaration('const', [
-          t.variableDeclarator(
-            t.identifier(componentName),
-            observerCall
-          )
-        ])
-      );
-    } else {
-      // Existing logic for other component types
-      const observerCall = t.callExpression(
-        t.identifier('observer'),
-        [componentNode]
-      );
-
-      // Remove TypeScript-specific properties
-      delete observerCall.arguments[0].typeParameters;
-      delete observerCall.arguments[0].returnType;
-
-      if (path.parentPath.isVariableDeclarator()) {
-        path.replaceWith(observerCall);
-      } else if (path.parentPath.isExportDefaultDeclaration() || path.parentPath.isExportNamedDeclaration()) {
-        path.replaceWith(observerCall);
-      } else {
-        path.replaceWith(
-          t.variableDeclaration('const', [
-            t.variableDeclarator(
-              t.identifier(componentName),
-              observerCall
-            )
-          ])
-        );
-      }
-    }
-
-    path.skip();
-  }
-}
-
-function isAlreadyWrapped(path, t) {
-  return (
-    path.parent &&
-    t.isCallExpression(path.parent) &&
-    t.isIdentifier(path.parent.callee) &&
-    path.parent.callee.name === 'observer'
-  );
-}
-
 function isReactComponent(path) {
-  // Check if it's a function that returns JSX
-  if (path.isFunctionDeclaration() || path.isFunctionExpression() || path.isArrowFunctionExpression()) {
-    const body = path.get("body");
-    if (body.isBlockStatement()) {
-      const returnStatement = body.get("body").find(p => p.isReturnStatement());
-      if (returnStatement && isJSXOrReactCreateElement(returnStatement.get("argument"))) {
-        return true;
-      }
-    } else if (isJSXOrReactCreateElement(body)) {
-      return true;
-    }
+  console.log("isReactComponent: path node type", path.node.type);
+  if (path.node.type === "ArrowFunctionExpression") {
+    return doesReturnJSX(path.node.body);
+  }
+  if (path.node.type === "FunctionDeclaration") {
+    return doesReturnJSX(path.node.body);
+  }
+  if (path.node.type === "FunctionExpression") {
+    return doesReturnJSX(path.node.body);
+  }
+  if (path.node.type === "ClassDeclaration") {
+    return classHasRenderMethod(path);
+  }
+  if (path.node.type === "ClassExpression") {
+    return classHasRenderMethod(path);
   }
 
-  // Check if it's a class that extends React.Component or Component
-  if (path.isClassDeclaration() || path.isClassExpression()) {
-    const superClass = path.get("superClass");
-    if (superClass.isIdentifier({ name: "Component" }) || 
-        (superClass.isMemberExpression() && superClass.get("object").isIdentifier({ name: "React" }) && superClass.get("property").isIdentifier({ name: "Component" }))) {
-      return true;
-    }
+  return false;
+}
 
-    // Check for render method returning JSX
-    const methods = path.get("body.body");
-    const renderMethod = methods.find(p => p.isClassMethod() && p.node.key.name === "render");
-    if (renderMethod && renderMethod.get("body").isBlockStatement()) {
-      const returnStatement = renderMethod.get("body.body").find(p => p.isReturnStatement());
-      if (returnStatement && isJSXOrReactCreateElement(returnStatement.get("argument"))) {
-        return true;
-      }
+function doesReturnJSX(body) {
+  if (!body) return false;
+  if (body.type === "JSXElement") {
+    return true;
+  }
+
+  var block = body.body;
+  if (block && block.length) {
+    var lastBlock = block.slice(0).pop();
+
+    if (lastBlock.type === "ReturnStatement") {
+      return (
+        lastBlock.argument !== null && lastBlock.argument.type === "JSXElement"
+      );
     }
   }
 
   return false;
 }
 
-function isJSXOrReactCreateElement(path) {
-  return path.isJSXElement() || 
-         (path.isCallExpression() && 
-          path.get("callee").isMemberExpression() && 
-          path.get("callee.object").isIdentifier({ name: "React" }) && 
-          path.get("callee.property").isIdentifier({ name: "createElement" }));
-}
-
-function isReactComponentOrObserved(path) {
-  if (path.isCallExpression() && path.get('callee').isIdentifier({ name: 'observer' })) {
-    return true;
+function classHasRenderMethod(path) {
+  if (!path.node.body) {
+    return false;
   }
-  return isReactComponent(path);
+  var members = path.node.body.body;
+  for (var i = 0; i < members.length; i++) {
+    if (members[i].type === "ClassMethod" && members[i].key.name === "render") {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export default autoObserverPlugin;

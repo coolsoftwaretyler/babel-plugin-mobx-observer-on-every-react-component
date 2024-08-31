@@ -1,0 +1,13 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin function declaration when it is not a React component it does nothing 1`] = `
+"function MyFunctionDeclaration() {
+  return 0;
+}"
+`;
+
+exports[`Mobx Observer Babel Plugin function declaration when it is a React component when it is not wrapped in observer it wraps the component in observer 1`] = `
+"observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;

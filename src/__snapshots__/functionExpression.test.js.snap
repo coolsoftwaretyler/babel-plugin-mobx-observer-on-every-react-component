@@ -1,0 +1,39 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin function expression when it is not a React component it does nothing 1`] = `
+"const MyFunctionExpression = function () {
+  return 0;
+};"
+`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is anonymous it does nothing 1`] = `
+"const MyAnonymousObserver = observer(function () {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is an arrow function it does nothing 1`] = `"const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));"`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer when the function is named it does nothing 1`] = `
+"const MyNamedObserver = observer(function MyNamedFunction() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is already wrapped in observer it does nothing 1`] = `
+"observer(function MyComponentExpression() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is not wrapped in observer when the function is anonymous it wraps the component in observer 1`] = `
+"const MyAnonymousObserver = observer(function () {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin function expression when the component is not wrapped in observer when the function is named it wraps the component in observer 1`] = `
+"const MyNamedObserver = observer(function MyNamedFunction() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
