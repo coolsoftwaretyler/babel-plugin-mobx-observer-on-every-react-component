@@ -11,7 +11,7 @@ observer(class MyComponent {
 });"
 `;
 
-exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is decorated with @observer it does nothing 1`] = `
+exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is decorated with @observer modern it does nothing 1`] = `
 "import { observer } from "mobx-react";
 @observer
 class MyComponent {
@@ -19,6 +19,16 @@ class MyComponent {
     return /*#__PURE__*/React.createElement("div", null, "Hello World");
   }
 }"
+`;
+
+exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is decorated with @observer legacy it does nothing 1`] = `
+"var _class;
+import { observer } from "mobx-react";
+let MyComponent = observer(_class = class MyComponent {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+}) || _class;"
 `;
 
 exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is not wrapped in observer it wraps the component in observer 1`] = `

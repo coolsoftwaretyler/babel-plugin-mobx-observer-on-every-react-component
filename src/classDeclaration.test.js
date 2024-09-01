@@ -3,11 +3,18 @@ import { transform } from "@babel/core";
 import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
 import pluginTransReactJsx from "@babel/plugin-transform-react-jsx";
 import pluginSyntaxDecorators from "@babel/plugin-syntax-decorators";
+import pluginSyntaxDecoratorsLegacy from "@babel/plugin-proposal-decorators";
 import { autoObserverPlugin } from "./index.mjs";
 
 const runTransform = (input) => {
   return transform(input, {
     plugins: [pluginSyntaxJsx, pluginTransReactJsx, [pluginSyntaxDecorators, { version: "2018-09", decoratorsBeforeExport: false }], autoObserverPlugin],
+  });
+};
+
+const runTransformLegacy = (input) => {
+  return transform(input, {
+    plugins: [pluginSyntaxJsx, pluginTransReactJsx, [pluginSyntaxDecoratorsLegacy, { legacy: true }], autoObserverPlugin],
   });
 };
 
@@ -31,13 +38,24 @@ describe("Mobx Observer Babel Plugin", () => {
         });
       });
       describe('and it is decorated with @observer', () => {
-        test('it does nothing', () => {
-          const source = `@observer class MyComponent { render() { return <div>Hello World</div>; } }`;
-          const out = runTransform(source);
+        describe('modern', () => {
+          test('it does nothing', () => {
+            const source = `@observer class MyComponent { render() { return <div>Hello World</div>; } }`;
+            const out = runTransform(source);
 
-          console.log(out.code);
+            console.log(out.code);
 
-          expect(out.code).toMatchSnapshot();
+            expect(out.code).toMatchSnapshot();
+          });
+        })
+        
+        describe('legacy', () => {
+          test('it does nothing', () => {
+            const source = `@observer class MyComponent { render() { return <div>Hello World</div>; } }`;
+            const out = runTransformLegacy(source);
+
+            expect(out.code).toMatchSnapshot();
+          });
         });
       });
       describe("and it is not wrapped in observer", () => {

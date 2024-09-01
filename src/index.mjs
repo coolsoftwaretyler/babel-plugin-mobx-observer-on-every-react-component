@@ -256,6 +256,17 @@ function isInNodeModules(state) {
 }
 
 function isWrappedInObserver(path) {
+  // If this class is on the right hand side of an assignment expression,
+  // check to see if that assignment expression is a call expression to observer
+  // which we can know from the parent of the parentPath
+
+  if (path.parentPath.node.type === "AssignmentExpression") {
+    if (path.parentPath.parentPath.node.type === "CallExpression" && path.parentPath.parentPath.node.callee.name === "observer") {
+      return true
+    }
+  }
+
+
   return (
     path.parentPath.node.type === "CallExpression" &&
     path.parentPath.node.callee.name === "observer"
