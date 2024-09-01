@@ -29,6 +29,14 @@ describe("Mobx Observer Babel Plugin", () => {
           expect(out.code).toMatchSnapshot();
         });
       });
+      describe('and we have other imports from mobx-react', () => {
+        test('it adds the observer import', () => {
+          const source = `import { inject } from "mobx-react"; function MyComponentDeclaration() { return <div>Hello World</div>; }`;
+          const out = runTransform(source);
+
+          expect(out.code).toMatchSnapshot();
+        })
+      })
     });
     describe("when there is already an observer import", () => {
       describe("and no react components", () => {
@@ -53,6 +61,14 @@ describe("Mobx Observer Babel Plugin", () => {
             const out = runTransform(source);
     
             expect(out.code).toMatchSnapshot();
+        })
+      })
+      describe('and we have other imports from mobx-react', () => {
+        test('it does not add the observer import', () => {
+          const source = `import { observer, inject } from "mobx-react"; function MyComponentDeclaration() { return <div>Hello World</div>; }`;
+          const out = runTransform(source);
+
+          expect(out.code).toMatchSnapshot();
         })
       })
     });

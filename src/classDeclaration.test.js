@@ -2,11 +2,12 @@ import { expect, test, describe } from "bun:test";
 import { transform } from "@babel/core";
 import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
 import pluginTransReactJsx from "@babel/plugin-transform-react-jsx";
+import pluginSyntaxDecorators from "@babel/plugin-syntax-decorators";
 import { autoObserverPlugin } from "./index.mjs";
 
 const runTransform = (input) => {
   return transform(input, {
-    plugins: [pluginSyntaxJsx, pluginTransReactJsx, autoObserverPlugin],
+    plugins: [pluginSyntaxJsx, pluginTransReactJsx, [pluginSyntaxDecorators, { version: "2018-09", decoratorsBeforeExport: false }], autoObserverPlugin],
   });
 };
 
@@ -25,6 +26,16 @@ describe("Mobx Observer Babel Plugin", () => {
         test("it does nothing", () => {
           const source = `observer(class MyComponent { render() { return <div>Hello World</div>; } })`;
           const out = runTransform(source);
+
+          expect(out.code).toMatchSnapshot();
+        });
+      });
+      describe('and it is decorated with @observer', () => {
+        test('it does nothing', () => {
+          const source = `@observer class MyComponent { render() { return <div>Hello World</div>; } }`;
+          const out = runTransform(source);
+
+          console.log(out.code);
 
           expect(out.code).toMatchSnapshot();
         });

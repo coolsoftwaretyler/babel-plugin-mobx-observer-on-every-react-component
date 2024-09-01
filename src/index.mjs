@@ -9,43 +9,43 @@ export const autoObserverPlugin = function (babel) {
         }
 
         let hasReactComponent = false;
+        let observerImported = false;
 
         path.traverse({
+          ImportDeclaration(path) {
+            if (path.node.source.value === 'mobx-react') {
+              const specifiers = path.node.specifiers;
+              observerImported = specifiers.some(spec => 
+                t.isImportSpecifier(spec) && spec.imported.name === 'observer'
+              );
+            }
+          },
           "ArrowFunctionExpression|FunctionDeclaration|FunctionExpression|ClassDeclaration|ClassExpression"(
             path
           ) {
             if (isReactComponent(path)) {
               hasReactComponent = true;
-              // Check to see if we have imported observer from mobx-react
-              const hasObserverImport = path.hub.file.code.includes(
-                'import { observer } from "mobx-react"'
-              );
-              if (!hasObserverImport) {
-                console.log(
-                  "no observer import in this file, adding one",
-                  path.hub.file.opts.filename
-                );
-                // Add the import statement
-                const importStatement = t.importDeclaration(
-                  [
-                    t.importSpecifier(
-                      t.identifier("observer"),
-                      t.identifier("observer")
-                    ),
-                  ],
-                  t.stringLiteral("mobx-react")
-                );
-
-                path.hub.file.path.node.body.unshift(importStatement);
-              } else {
-                console.log(
-                  "has observer import in this file",
-                  path.hub.file.opts.filename
-                );
-              }
             }
           },
         });
+
+        if (hasReactComponent && !observerImported) {
+          const existingImport = path.node.body.find(node => 
+            t.isImportDeclaration(node) && node.source.value === 'mobx-react'
+          );
+
+          if (existingImport) {
+            existingImport.specifiers.push(
+              t.importSpecifier(t.identifier('observer'), t.identifier('observer'))
+            );
+          } else {
+            const importStatement = t.importDeclaration(
+              [t.importSpecifier(t.identifier('observer'), t.identifier('observer'))],
+              t.stringLiteral('mobx-react')
+            );
+            path.node.body.unshift(importStatement);
+          }
+        }
 
         if (!hasReactComponent) {
           console.log(
@@ -100,7 +100,12 @@ export const autoObserverPlugin = function (babel) {
               path.node.id?.name ?? "Anonymous"
             );
             return;
-          } else {
+          } 
+          else if (isDecoratedWithObserver(path)) {
+            console.log("decorated with @observer", path.node.id?.name ?? "Anonymous");
+            return;
+          }
+          else {
             console.log(
               "not wrapped in observer",
               path.node.id?.name ?? "Anonymous"
@@ -254,6 +259,17 @@ function isWrappedInObserver(path) {
   return (
     path.parentPath.node.type === "CallExpression" &&
     path.parentPath.node.callee.name === "observer"
+  );
+}
+
+function isDecoratedWithObserver(path) {
+  return (
+    path.node.decorators &&
+    path.node.decorators.length > 0 &&
+    path.node.decorators.some(decorator => 
+      decorator.expression.type === 'Identifier' && 
+      decorator.expression.name === 'observer'
+    )
   );
 }
 
