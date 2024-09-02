@@ -30,7 +30,9 @@
     "@babel/plugin-proposal-decorators": "^7.24.7",
     "@babel/plugin-syntax-decorators": "^7.24.7",
     "@babel/preset-env": "^7.25.4",
-    "@babel/preset-react": "^7.24.7"
+    "@babel/preset-react": "^7.24.7",
+    "mobx": "^6.13.1",
+    "mobx-react": "^9.1.1"
   },
   "scripts": {
     "build": "babel src/index.mjs --out-file dist/index.js"
