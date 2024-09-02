@@ -1,7 +1,13 @@
 import { declare } from "@babel/helper-plugin-utils";
 
-export default declare((api, options) => {
+interface PluginOptions {
+  debugEnabled?: boolean;
+}
+
+export default declare((api, options?: PluginOptions ) => {
+  const debugEnabled = options?.debugEnabled ?? false;
   const t = api.types;
+  
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
@@ -52,10 +58,10 @@ export default declare((api, options) => {
         }
 
         if (!hasReactComponent) {
-          console.log(
-            "no react components in this file",
+          debug(
             // @ts-expect-error
-            path.hub.file.opts.filename
+            `no react components in this file ${path.hub.file.opts.filename}`,
+            debugEnabled
           );
         }
       },
@@ -66,16 +72,16 @@ export default declare((api, options) => {
         }
 
         // @ts-expect-error
-        console.log("arrow function expression", path.hub.file.opts.filename);
+        debug(`arrow function expression ${path.hub.file.opts.filename}`, debugEnabled);
 
         if (isReactComponent(path)) {
-          console.log("is react component");
+          debug("is react component", debugEnabled);
           // Check to see if this is already wrapped in observer
           if (isWrappedInObserver(path)) {
-            console.log("already wrapped in observer");
+            debug("already wrapped in observer", debugEnabled);
             return;
           } else {
-            console.log("not wrapped in observer");
+            debug("not wrapped in observer", debugEnabled);
             // Wrap the ArrowFunctionExpression with observer()
             const observerFunction = t.callExpression(
               t.identifier("observer"),
@@ -86,7 +92,7 @@ export default declare((api, options) => {
             path.replaceWith(observerFunction);
           }
         } else {
-          console.log("not a react component");
+          debug("not a react component", debugEnabled);
         }
       },
       ClassDeclaration(path, state) {
@@ -95,34 +101,37 @@ export default declare((api, options) => {
         }
 
         if (isReactComponent(path)) {
-          console.log(
-            "hasReactComponent class",
-            path.node.id?.name ?? "Anonymous"
+          debug(
+            `hasReactComponent class ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
           // Check to see if this is already wrapped in observer
           if (isWrappedInObserver(path)) {
-            console.log(
-              "already wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
             return;
           } 
           else if (isDecoratedWithObserver(path)) {
-            console.log("decorated with @observer", path.node.id?.name ?? "Anonymous");
+            debug(
+              `decorated with @observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
+            );
             return;
           }
           else {
-            console.log(
-              "not wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `not wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
 
             wrapClassDeclarationInObserver(path, t);
           }
         } else {
-          console.log(
-            "not a react component class",
-            path.node.id?.name ?? "Anonymous"
+          debug(
+            `not a react component class ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
         }
       },
@@ -132,32 +141,30 @@ export default declare((api, options) => {
         }
 
         if (isReactComponent(path)) {
-          console.log(
-            "hasReactComponent class expression",
-            // @ts-expect-error
-            path.hub.file.opts.filename
+          debug(
+            `hasReactComponent class expression ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
 
           // Check to see if this is already wrapped in observer
           if (isWrappedInObserver(path)) {
-            console.log(
-              "already wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
             return;
           } else {
-            console.log(
-              "not wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `not wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
 
             wrapClassExpressionInObserver(path, t);
           }
         } else {
-          console.log(
-            "not a react component class expression",
-            // @ts-expect-error
-            path.hub.file.opts.filename
+          debug(
+            `not a react component class expression ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
         }
       },
@@ -166,16 +173,19 @@ export default declare((api, options) => {
           return;
         }
 
-        console.log("checking function declaration", path.node.id?.name ?? "Anonymous");
+        debug(`checking function declaration ${path.node.id?.name ?? "Anonymous"}`, debugEnabled);
 
         if (isReactComponent(path)) {
-          console.log(
-            "hasReactComponent function declaration",
-            path.node.id?.name ?? "Anonymous"
+          debug(
+            `hasReactComponent function declaration ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
 
           if (isWrappedInObserver(path)) {
-            console.log("already wrapped in observer", path.node.id?.name ?? "Anonymous");
+            debug(
+              `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
+            );
             return;
           }
 
@@ -207,7 +217,10 @@ export default declare((api, options) => {
           // Replace the old function declaration with the new one
           path.replaceWith(newFunctionDeclaration);
         } else {
-          console.log("not a react component", path.node.id?.name ?? "Anonymous");
+          debug(
+            `not a react component ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
+          );
         }
       },
       FunctionExpression(path, state) {
@@ -215,28 +228,25 @@ export default declare((api, options) => {
           return;
         }
 
-        console.log(
-          "checking function expression",
-          path.node.id?.name ?? "Anonymous"
-        );
+        debug(`checking function expression ${path.node.id?.name ?? "Anonymous"}`, debugEnabled);
 
         if (isReactComponent(path)) {
-          console.log(
-            "hasReactComponent function expression",
-            path.node.id?.name ?? "Anonymous"
+          debug(
+            `hasReactComponent function expression ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
 
           // Check to see if this is already wrapped in observer
           if (isWrappedInObserver(path)) {
-            console.log(
-              "already wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
             return;
           } else {
-            console.log(
-              "not wrapped in observer",
-              path.node.id?.name ?? "Anonymous"
+            debug(
+              `not wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
+              debugEnabled
             );
             // Wrap the FunctionExpression with observer()
             const observerFunction = t.callExpression(
@@ -248,9 +258,9 @@ export default declare((api, options) => {
             path.replaceWith(observerFunction);
           }
         } else {
-          console.log(
-            "not a react component",
-            path.node.id?.name ?? "Anonymous"
+          debug(
+            `not a react component ${path.node.id?.name ?? "Anonymous"}`,
+            debugEnabled
           );
         }
       },
@@ -345,8 +355,7 @@ function wrapClassExpressionInObserver(path, t) {
 
 
 // @ts-expect-error
-function isReactComponent(path) {
-  console.log("isReactComponent: path node type", path.node.type);
+function isReactComponent(path ) {
   if (path.node.type === "ArrowFunctionExpression") {
     return doesReturnJSX(path.node.body);
   }
@@ -403,3 +412,8 @@ function classHasRenderMethod(path) {
   return false;
 }
 
+function debug(message: string, debugEnabled: boolean) {
+  if (debugEnabled) {
+    console.log(message);
+  }
+}
