@@ -111,7 +111,7 @@ export const autoObserverPlugin = function (babel) {
               path.node.id?.name ?? "Anonymous"
             );
 
-            wrapClassInObserver(path, t);
+            wrapClassDeclarationInObserver(path, t);
           }
         } else {
           console.log(
@@ -144,7 +144,7 @@ export const autoObserverPlugin = function (babel) {
               path.node.id?.name ?? "Anonymous"
             );
 
-            wrapClassInObserver(path, t);
+            wrapClassExpressionInObserver(path, t);
           }
         } else {
           console.log(
@@ -284,26 +284,52 @@ function isDecoratedWithObserver(path) {
   );
 }
 
-function wrapClassInObserver(path, t) {
+function wrapClassDeclarationInObserver(path, t) {
+    const classExpression = t.classExpression(
+      path.node.id,
+      path.node.superClass,
+      path.node.body,
+      path.node.decorators
+    );
+  
+    // Wrap the ClassExpression with observer()
+    const observerFunction = t.callExpression(
+      t.identifier("observer"),
+      [classExpression]
+    );
+  
+    // Create a variable declaration with the observer-wrapped class
+    const variableDeclaration = t.variableDeclaration("const", [
+      t.variableDeclarator(path.node.id, observerFunction)
+    ]);
+  
+  
+    // Replace the ClassDeclaration with the observer() wrapped version
+    path.replaceWith(variableDeclaration);
+  }
+
+function wrapClassExpressionInObserver(path, t) {
   const classExpression = t.classExpression(
     path.node.id,
     path.node.superClass,
     path.node.body,
     path.node.decorators
   );
-  // Wrap the ClassDeclaration with observer()
+
+  // Wrap the ClassExpression with observer()
   const observerFunction = t.callExpression(
     t.identifier("observer"),
     [classExpression]
   );
 
-  // We need to also kick the identifier of the class into a variable assignment
+  // Create a variable declaration with the observer-wrapped class
   const variableDeclaration = t.variableDeclaration("const", [
     t.variableDeclarator(path.node.id, observerFunction)
   ]);
 
+
   // Replace the ClassDeclaration with the observer() wrapped version
-  path.replaceWith(variableDeclaration);
+  path.replaceWith(observerFunction);
 }
 
 function isReactComponent(path) {
