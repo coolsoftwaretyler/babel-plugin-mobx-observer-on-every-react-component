@@ -5,7 +5,7 @@ class CounterStore {
   count = 0;
 
   constructor() {
-    makeAutoObservable(this); // Automatically makes state and methods reactive
+    makeAutoObservable(this);
   }
 
   increment() {
