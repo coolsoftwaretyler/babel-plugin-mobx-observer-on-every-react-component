@@ -1,8 +1,14 @@
 import { declare } from "@babel/helper-plugin-utils";
+import { Decorator } from '@babel/types';
+import { NodePath } from '@babel/core';
+import * as t from '@babel/types';
+import { PluginPass } from '@babel/core';
 
 interface PluginOptions {
   debugEnabled?: boolean;
 }
+
+type BabelTypes = typeof import('@babel/types');
 
 export default declare((api, options?: PluginOptions ) => {
   const debugEnabled = options?.debugEnabled ?? false;
@@ -32,7 +38,7 @@ export default declare((api, options?: PluginOptions ) => {
           "ArrowFunctionExpression|FunctionDeclaration|FunctionExpression|ClassDeclaration|ClassExpression"(
             path
           ) {
-            if (isReactComponent(path)) {
+            if (isReactComponent(path as NodePath<t.ArrowFunctionExpression | t.FunctionDeclaration | t.FunctionExpression | t.ClassDeclaration | t.ClassExpression>)) {
               hasReactComponent = true;
             }
           },
@@ -42,9 +48,7 @@ export default declare((api, options?: PluginOptions ) => {
           const existingImport = path.node.body.find(node => 
             t.isImportDeclaration(node) && node.source.value === 'mobx-react'
           );
-
-          if (existingImport) {
-            // @ts-expect-error
+          if (existingImport && t.isImportDeclaration(existingImport)) {
             existingImport.specifiers.push(
               t.importSpecifier(t.identifier('observer'), t.identifier('observer'))
             );
@@ -59,8 +63,7 @@ export default declare((api, options?: PluginOptions ) => {
 
         if (!hasReactComponent) {
           debug(
-            // @ts-expect-error
-            `no react components in this file ${path.hub.file.opts.filename}`,
+            `no react components in this file ${state.filename}`,
             debugEnabled
           );
         }
@@ -71,13 +74,12 @@ export default declare((api, options?: PluginOptions ) => {
           return;
         }
 
-        // @ts-expect-error
-        debug(`arrow function expression ${path.hub.file.opts.filename}`, debugEnabled);
+        debug(`arrow function expression ${state.filename}`, debugEnabled);
 
         if (isReactComponent(path)) {
           debug("is react component", debugEnabled);
           // Check to see if this is already wrapped in observer
-          if (isWrappedInObserver(path)) {
+          if (isWrappedInObserver(path as NodePath<t.ArrowFunctionExpression>)) {
             debug("already wrapped in observer", debugEnabled);
             return;
           } else {
@@ -106,7 +108,7 @@ export default declare((api, options?: PluginOptions ) => {
             debugEnabled
           );
           // Check to see if this is already wrapped in observer
-          if (isWrappedInObserver(path)) {
+          if (isWrappedInObserver(path as NodePath<t.ClassDeclaration>)) {
             debug(
               `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
               debugEnabled
@@ -147,7 +149,7 @@ export default declare((api, options?: PluginOptions ) => {
           );
 
           // Check to see if this is already wrapped in observer
-          if (isWrappedInObserver(path)) {
+          if (isWrappedInObserver(path as NodePath<t.ClassExpression>)) {
             debug(
               `already wrapped in observer ${path.node.id?.name ?? "Anonymous"}`,
               debugEnabled
@@ -268,43 +270,39 @@ export default declare((api, options?: PluginOptions ) => {
   };
 });
 
-function isInNodeModules(state: any) {
-  const filename = state.file.opts.filename;
-  return filename && filename.includes("node_modules");
+function isInNodeModules(state: PluginPass): boolean {
+  const filename = state.filename;
+  return !!(filename && filename.includes("node_modules"))
 }
 
-function isWrappedInObserver(path: any) {
-  // If this class is on the right hand side of an assignment expression,
-  // check to see if that assignment expression is a call expression to observer
-  // which we can know from the parent of the parentPath
-
-  if (path.parentPath.node.type === "AssignmentExpression") {
-    if (path.parentPath.parentPath.node.type === "CallExpression" && path.parentPath.parentPath.node.callee.name === "observer") {
-      return true
+function isWrappedInObserver(path: NodePath<t.ArrowFunctionExpression | t.FunctionDeclaration | t.FunctionExpression | t.ClassDeclaration | t.ClassExpression>): boolean {
+  const parent = path.parentPath;
+  if (parent && t.isAssignmentExpression(parent.node)) {
+    const grandParent = parent.parentPath;
+    if (grandParent && t.isCallExpression(grandParent.node) && t.isIdentifier(grandParent.node.callee) && grandParent.node.callee.name === 'observer') {
+      return true;
     }
   }
 
-
   return (
-    path.parentPath.node.type === "CallExpression" &&
-    path.parentPath.node.callee.name === "observer"
+    t.isCallExpression(parent?.node) &&
+    t.isIdentifier(parent.node.callee) &&
+    parent.node.callee.name === 'observer'
   );
 }
 
-function isDecoratedWithObserver(path: any) {
-  return (
+function isDecoratedWithObserver(path: NodePath<t.ClassDeclaration | t.ClassExpression>): boolean {
+  return !!(
     path.node.decorators &&
     path.node.decorators.length > 0 &&
-    // @ts-expect-errork
-    path.node.decorators.some(decorator => 
+    path.node.decorators.some((decorator: Decorator) => 
       decorator.expression.type === 'Identifier' && 
       decorator.expression.name === 'observer'
     )
   );
 }
 
-// @ts-expect-error
-function wrapClassDeclarationInObserver(path, t) {
+function wrapClassDeclarationInObserver(path: NodePath<t.ClassDeclaration>, t: BabelTypes) {
     const classExpression = t.classExpression(
       path.node.id,
       path.node.superClass,
@@ -320,7 +318,7 @@ function wrapClassDeclarationInObserver(path, t) {
   
     // Create a variable declaration with the observer-wrapped class
     const variableDeclaration = t.variableDeclaration("const", [
-      t.variableDeclarator(path.node.id, observerFunction)
+      t.variableDeclarator(path.node.id as t.Identifier, observerFunction)
     ]);
   
   
@@ -328,8 +326,7 @@ function wrapClassDeclarationInObserver(path, t) {
     path.replaceWith(variableDeclaration);
   }
 
-// @ts-expect-error
-function wrapClassExpressionInObserver(path, t) {
+function wrapClassExpressionInObserver(path: NodePath<t.ClassExpression>, t: BabelTypes) {
   const classExpression = t.classExpression(
     path.node.id,
     path.node.superClass,
@@ -343,19 +340,12 @@ function wrapClassExpressionInObserver(path, t) {
     [classExpression]
   );
 
-  // Create a variable declaration with the observer-wrapped class
-  const variableDeclaration = t.variableDeclaration("const", [
-    t.variableDeclarator(path.node.id, observerFunction)
-  ]);
-
-
   // Replace the ClassDeclaration with the observer() wrapped version
   path.replaceWith(observerFunction);
 }
 
 
-// @ts-expect-error
-function isReactComponent(path ) {
+function isReactComponent(path: NodePath<t.ArrowFunctionExpression | t.FunctionDeclaration | t.FunctionExpression | t.ClassDeclaration | t.ClassExpression>): boolean {
   if (path.node.type === "ArrowFunctionExpression") {
     return doesReturnJSX(path.node.body);
   }
@@ -366,45 +356,41 @@ function isReactComponent(path ) {
     return doesReturnJSX(path.node.body);
   }
   if (path.node.type === "ClassDeclaration") {
-    return classHasRenderMethod(path);
+    return classHasRenderMethod(path as NodePath<t.ClassDeclaration>);
   }
   if (path.node.type === "ClassExpression") {
-    return classHasRenderMethod(path);
+    return classHasRenderMethod(path as NodePath<t.ClassExpression>);
   }
 
   return false;
 }
 
-// @ts-expect-error
-function doesReturnJSX(body) {
+function doesReturnJSX(body: t.BlockStatement | t.Expression): boolean {
   if (!body) return false;
-  if (body.type === "JSXElement" || body.type === "JSXFragment") {
+  if (t.isJSXElement(body) || t.isJSXFragment(body)) {
     return true;
   }
 
-  var block = body.body;
-  if (block && block.length) {
-    var lastBlock = block.slice(0).pop();
-
-    if (lastBlock.type === "ReturnStatement") {
-      return (
-        lastBlock.argument !== null && 
-        (lastBlock.argument.type === "JSXElement" || lastBlock.argument.type === "JSXFragment")
-      );
+  if (t.isBlockStatement(body)) {
+    const statements = body.body;
+    if (statements.length > 0) {
+      const lastStatement = statements[statements.length - 1];
+      if (t.isReturnStatement(lastStatement) && lastStatement.argument) {
+        return t.isJSXElement(lastStatement.argument) || t.isJSXFragment(lastStatement.argument);
+      }
     }
   }
 
   return false;
 }
 
-// @ts-expect-error
-function classHasRenderMethod(path) {
+function classHasRenderMethod(path: NodePath<t.ClassDeclaration | t.ClassExpression>): boolean {
   if (!path.node.body) {
     return false;
   }
-  var members = path.node.body.body;
-  for (var i = 0; i < members.length; i++) {
-    if (members[i].type === "ClassMethod" && members[i].key.name === "render") {
+  const members = path.node.body.body;
+  for (const member of members) {
+    if (t.isClassMethod(member) && t.isIdentifier(member.key) && member.key.name === "render") {
       return true;
     }
   }
@@ -412,7 +398,7 @@ function classHasRenderMethod(path) {
   return false;
 }
 
-function debug(message: string, debugEnabled: boolean) {
+function debug(message: string, debugEnabled: boolean): void {
   if (debugEnabled) {
     console.log(message);
   }
