@@ -4,7 +4,7 @@ import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
 import pluginTransReactJsx from "@babel/plugin-transform-react-jsx";
 import pluginSyntaxDecorators from "@babel/plugin-syntax-decorators";
 import pluginSyntaxDecoratorsLegacy from "@babel/plugin-proposal-decorators";
-import { autoObserverPlugin } from "./index.mjs";
+import autoObserverPlugin from "./index.ts";
 
 const runTransform = (input) => {
   return transform(input, {

@@ -7,7 +7,7 @@ interface PluginOptions {
 export default declare((api, options?: PluginOptions ) => {
   const debugEnabled = options?.debugEnabled ?? false;
   const t = api.types;
-  
+
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
@@ -24,8 +24,8 @@ export default declare((api, options?: PluginOptions ) => {
             if (path.node.source.value === 'mobx-react') {
               const specifiers = path.node.specifiers;
               observerImported = specifiers.some(spec => 
-                // @ts-expect-error
-                t.isImportSpecifier(spec) && spec.imported.name === 'observer'
+                t.isImportSpecifier(spec) && 
+                (spec.imported.type === 'Identifier' && spec.imported.name === 'observer')
               );
             }
           },
