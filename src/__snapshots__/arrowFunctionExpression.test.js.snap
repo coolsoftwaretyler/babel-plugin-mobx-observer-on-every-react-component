@@ -1,0 +1,13 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin arrow function expression when the function is not a react component it does not wrap the component in observer 1`] = `"const MyArrow = () => 0;"`;
+
+exports[`Mobx Observer Babel Plugin arrow function expression when the function is already wrapped it does not wrap the component in observer 1`] = `
+"import { observer } from "mobx-react";
+const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));"
+`;
+
+exports[`Mobx Observer Babel Plugin arrow function expression when the function is not already wrapped it wraps the component in observer 1`] = `
+"import { observer } from "mobx-react";
+const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));"
+`;

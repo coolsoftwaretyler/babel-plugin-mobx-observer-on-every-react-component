@@ -1,0 +1,21 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin class declarations when it is not a React component it does nothing 1`] = `"const MyRegularClass = class MyRegularClass {};"`;
+
+exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is already wrapped in observer it does nothing 1`] = `
+"import { observer } from "mobx-react";
+const MyComponent = observer(class MyComponent {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+});"
+`;
+
+exports[`Mobx Observer Babel Plugin class declarations when it is a React component and it is not wrapped in observer it wraps the component in observer 1`] = `
+"import { observer } from "mobx-react";
+const MyComponent = observer(class MyComponent {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+});"
+`;
