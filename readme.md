@@ -5,7 +5,14 @@ Wrap literally every React component in an MobX observer higher order component.
 ## Install
 
 ```bash
+# npm
 npm install --save-dev babel-plugin-mobx-observer-on-every-react-component
+# yarn
+yarn add --dev babel-plugin-mobx-observer-on-every-react-component
+# pnpm
+pnpm add --dev babel-plugin-mobx-observer-on-every-react-component
+# bun
+bun add --dev babel-plugin-mobx-observer-on-every-react-component
 ```
 
 ## Usage
