@@ -297,8 +297,13 @@ function wrapClassInObserver(path, t) {
     [classExpression]
   );
 
+  // We need to also kick the identifier of the class into a variable assignment
+  const variableDeclaration = t.variableDeclaration("const", [
+    t.variableDeclarator(path.node.id, observerFunction)
+  ]);
+
   // Replace the ClassDeclaration with the observer() wrapped version
-  path.replaceWith(observerFunction);
+  path.replaceWith(variableDeclaration);
 }
 
 function isReactComponent(path) {
