@@ -104,7 +104,10 @@ bun install
 bun dev
 ```
 
-Then check out the Vite app that starts.
+Then check out the Vite app that starts. It'll look something like this:
+
+https://github.com/user-attachments/assets/1e1dc69e-defe-4387-82c9-c91ab0a5c887
+
 
 ### Babel REPL
 
