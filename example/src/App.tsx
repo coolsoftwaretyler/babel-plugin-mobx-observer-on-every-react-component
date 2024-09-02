@@ -19,7 +19,7 @@ class CounterStore {
 
 const counterStore = new CounterStore();
 
-function App() {
+const App = function App() {
   return (
     <>
       <div>
@@ -30,4 +30,5 @@ function App() {
     </>
   )
 }
-export default App
+
+export default App;

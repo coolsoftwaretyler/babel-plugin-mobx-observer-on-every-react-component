@@ -338,8 +338,6 @@ function isReactComponent(path) {
     return doesReturnJSX(path.node.body);
   }
   if (path.node.type === "FunctionDeclaration") {
-    console.log('did we get here?')
-    console.log("isReactComponent: FunctionDeclaration", path.node.body.body[0]);
     return doesReturnJSX(path.node.body);
   }
   if (path.node.type === "FunctionExpression") {
