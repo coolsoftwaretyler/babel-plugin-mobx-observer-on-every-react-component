@@ -1,5 +1,7 @@
-export const autoObserverPlugin = function (babel) {
-  const t = babel.types;
+import { declare } from "@babel/helper-plugin-utils";
+
+export default declare((api, options) => {
+  const t = api.types;
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
     visitor: {
@@ -16,6 +18,7 @@ export const autoObserverPlugin = function (babel) {
             if (path.node.source.value === 'mobx-react') {
               const specifiers = path.node.specifiers;
               observerImported = specifiers.some(spec => 
+                // @ts-expect-error
                 t.isImportSpecifier(spec) && spec.imported.name === 'observer'
               );
             }
@@ -35,6 +38,7 @@ export const autoObserverPlugin = function (babel) {
           );
 
           if (existingImport) {
+            // @ts-expect-error
             existingImport.specifiers.push(
               t.importSpecifier(t.identifier('observer'), t.identifier('observer'))
             );
@@ -50,6 +54,7 @@ export const autoObserverPlugin = function (babel) {
         if (!hasReactComponent) {
           console.log(
             "no react components in this file",
+            // @ts-expect-error
             path.hub.file.opts.filename
           );
         }
@@ -60,6 +65,7 @@ export const autoObserverPlugin = function (babel) {
           return;
         }
 
+        // @ts-expect-error
         console.log("arrow function expression", path.hub.file.opts.filename);
 
         if (isReactComponent(path)) {
@@ -128,6 +134,7 @@ export const autoObserverPlugin = function (babel) {
         if (isReactComponent(path)) {
           console.log(
             "hasReactComponent class expression",
+            // @ts-expect-error
             path.hub.file.opts.filename
           );
 
@@ -149,6 +156,7 @@ export const autoObserverPlugin = function (babel) {
         } else {
           console.log(
             "not a react component class expression",
+            // @ts-expect-error
             path.hub.file.opts.filename
           );
         }
@@ -158,12 +166,12 @@ export const autoObserverPlugin = function (babel) {
           return;
         }
 
-        console.log("checking function declaration", path.node.id.name);
+        console.log("checking function declaration", path.node.id?.name ?? "Anonymous");
 
         if (isReactComponent(path)) {
           console.log(
             "hasReactComponent function declaration",
-            path.node.id.name
+            path.node.id?.name ?? "Anonymous"
           );
 
           if (isWrappedInObserver(path)) {
@@ -199,7 +207,7 @@ export const autoObserverPlugin = function (babel) {
           // Replace the old function declaration with the new one
           path.replaceWith(newFunctionDeclaration);
         } else {
-          console.log("not a react component", path.node.id.name);
+          console.log("not a react component", path.node.id?.name ?? "Anonymous");
         }
       },
       FunctionExpression(path, state) {
@@ -248,14 +256,14 @@ export const autoObserverPlugin = function (babel) {
       },
     },
   };
-};
+});
 
-function isInNodeModules(state) {
+function isInNodeModules(state: any) {
   const filename = state.file.opts.filename;
   return filename && filename.includes("node_modules");
 }
 
-function isWrappedInObserver(path) {
+function isWrappedInObserver(path: any) {
   // If this class is on the right hand side of an assignment expression,
   // check to see if that assignment expression is a call expression to observer
   // which we can know from the parent of the parentPath
@@ -273,10 +281,11 @@ function isWrappedInObserver(path) {
   );
 }
 
-function isDecoratedWithObserver(path) {
+function isDecoratedWithObserver(path: any) {
   return (
     path.node.decorators &&
     path.node.decorators.length > 0 &&
+    // @ts-expect-errork
     path.node.decorators.some(decorator => 
       decorator.expression.type === 'Identifier' && 
       decorator.expression.name === 'observer'
@@ -284,6 +293,7 @@ function isDecoratedWithObserver(path) {
   );
 }
 
+// @ts-expect-error
 function wrapClassDeclarationInObserver(path, t) {
     const classExpression = t.classExpression(
       path.node.id,
@@ -308,6 +318,7 @@ function wrapClassDeclarationInObserver(path, t) {
     path.replaceWith(variableDeclaration);
   }
 
+// @ts-expect-error
 function wrapClassExpressionInObserver(path, t) {
   const classExpression = t.classExpression(
     path.node.id,
@@ -332,6 +343,8 @@ function wrapClassExpressionInObserver(path, t) {
   path.replaceWith(observerFunction);
 }
 
+
+// @ts-expect-error
 function isReactComponent(path) {
   console.log("isReactComponent: path node type", path.node.type);
   if (path.node.type === "ArrowFunctionExpression") {
@@ -353,6 +366,7 @@ function isReactComponent(path) {
   return false;
 }
 
+// @ts-expect-error
 function doesReturnJSX(body) {
   if (!body) return false;
   if (body.type === "JSXElement" || body.type === "JSXFragment") {
@@ -374,6 +388,7 @@ function doesReturnJSX(body) {
   return false;
 }
 
+// @ts-expect-error
 function classHasRenderMethod(path) {
   if (!path.node.body) {
     return false;
@@ -388,4 +403,3 @@ function classHasRenderMethod(path) {
   return false;
 }
 
-export default autoObserverPlugin;

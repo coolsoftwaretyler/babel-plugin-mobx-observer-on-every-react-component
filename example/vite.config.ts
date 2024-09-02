@@ -9,7 +9,7 @@ export default defineConfig({
     babel: {
       plugins: [
         [
-          "../src/index.mjs",
+          "../dist/index.cjs.js",
         ]
       ]
     }

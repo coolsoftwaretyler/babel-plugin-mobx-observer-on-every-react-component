@@ -10,18 +10,19 @@
   "bugs": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component/issues",
   "license": "MIT",
   "author": "Tyler Williams",
-  "main": "dist/index.js",
-  "module": "src/index.mjs",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "exports": {
     ".": {
-      "import": "./src/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.cjs.js"
     }
   },
   "files": [
-    "dist/index.js",
-    "src/index.mjs"
+    "dist/index.cjs.js",
+    "dist/index.esm.js",
+    "src/index.ts"
   ],
   "repository": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component",
   "devDependencies": {
@@ -31,10 +32,17 @@
     "@babel/plugin-syntax-decorators": "^7.24.7",
     "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7",
+    "@types/babel__core": "^7.20.5",
+    "@types/babel__helper-plugin-utils": "^7.10.3",
     "mobx": "^6.13.1",
-    "mobx-react": "^9.1.1"
+    "mobx-react": "^9.1.1",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "babel src/index.mjs --out-file dist/index.js"
+    "clean": "rimraf dist",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc --module commonjs --outDir dist && mv dist/index.js dist/index.cjs.js",
+    "build:esm": "tsc --module es2015 --outDir dist && mv dist/index.js dist/index.esm.js"
   }
 }
