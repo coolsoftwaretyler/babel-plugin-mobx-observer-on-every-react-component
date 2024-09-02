@@ -17,6 +17,7 @@ type BabelTypes = typeof import('@babel/types');
 export default declare((api, options?: PluginOptions ) => {
   const debugEnabled = options?.debugEnabled ?? false;
   const t = api.types;
+  let ignoreFile = false;
 
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
@@ -25,12 +26,37 @@ export default declare((api, options?: PluginOptions ) => {
         if (isInNodeModules(state)) {
           return;
         }
+        
 
         let hasReactComponent = false;
         let observerImported = false;
+        ignoreFile = false; // Reset ignoreFile flag for each file
 
+        const comments: Array<t.Comment> = []
+
+        if (path.node.leadingComments) comments.push(...path.node.leadingComments);
+        if (path.node.innerComments) comments.push(...path.node.innerComments);
+        if (path.node.trailingComments) comments.push(...path.node.trailingComments);
+      
         path.traverse({
+          enter(path) {
+            const node = path.node;
+            if (node.leadingComments) comments.push(...node.leadingComments);
+            if (node.innerComments) comments.push(...node.innerComments);
+            if (node.trailingComments) comments.push(...node.trailingComments);
+
+            // If the file is set to be ignored, do not process it
+            if (comments.some(comment => comment.value.includes('@auto-observer-ignore-file'))) {
+              ignoreFile = true;
+              debug(`ignoring file ${state.filename}`, debugEnabled);
+              return;
+            }
+          },
           ImportDeclaration(path) {
+            if (ignoreFile) {
+              return;
+            }
+
             if (path.node.source.value === 'mobx-react') {
               const specifiers = path.node.specifiers;
               observerImported = specifiers.some(spec => 
@@ -48,7 +74,7 @@ export default declare((api, options?: PluginOptions ) => {
           },
         });
 
-        if (hasReactComponent && !observerImported) {
+        if (hasReactComponent && !observerImported && !ignoreFile) {
           const existingImport = path.node.body.find(node => 
             t.isImportDeclaration(node) && node.source.value === 'mobx-react'
           );
@@ -74,7 +100,7 @@ export default declare((api, options?: PluginOptions ) => {
       },
 
       ArrowFunctionExpression(path, state) {
-        if (isInNodeModules(state)) {
+        if (isInNodeModules(state) || ignoreFile) {
           return;
         }
 
@@ -102,7 +128,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       ClassDeclaration(path, state) {
-        if (isInNodeModules(state)) {
+        if (isInNodeModules(state) || ignoreFile) {
           return;
         }
 
@@ -142,7 +168,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       ClassExpression(path, state) {
-        if (isInNodeModules(state)) {
+        if (isInNodeModules(state) || ignoreFile) {
           return;
         }
 
@@ -175,7 +201,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       FunctionDeclaration(path, state) {
-        if (isInNodeModules(state)) {
+        if (isInNodeModules(state) || ignoreFile) {
           return;
         }
 
@@ -230,7 +256,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       FunctionExpression(path, state) {
-        if (isInNodeModules(state)) {
+        if (isInNodeModules(state) || ignoreFile) {
           return;
         }
 
