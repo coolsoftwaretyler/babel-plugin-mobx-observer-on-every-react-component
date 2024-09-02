@@ -1,10 +1,14 @@
 {
   "name": "babel-plugin-mobx-observer-on-every-react-component",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Wrap literally every React component in an MobX observer higher order component.",
   "keywords": [
     "babel-plugin",
-    "mobx"
+    "mobx",
+    "mobx-react",
+    "react",
+    "observer",
+    "babel"
   ],
   "homepage": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component",
   "bugs": "https://github.com/coolsoftwaretyler/babel-plugin-mobx-observer-on-every-react-component/issues",
@@ -41,7 +45,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "build": "bun run clean && bun run build:cjs && bun run build:esm",
     "build:cjs": "tsc --module commonjs --outDir dist && mv dist/index.js dist/index.cjs.js",
     "build:esm": "tsc --module es2015 --outDir dist && mv dist/index.js dist/index.esm.js"
   }
