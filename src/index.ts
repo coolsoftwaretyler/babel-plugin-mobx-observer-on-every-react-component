@@ -9,7 +9,7 @@ import { PluginPass } from '@babel/core';
  */
 interface PluginOptions {
   // Default false, controls if we log debug statements during plugin execution. Mostly intended for plugin developers.
-  debugEnabled?: boolean; 
+  debugEnabled?: boolean;
 }
 
 type BabelTypes = typeof import('@babel/types');
@@ -18,6 +18,8 @@ export default declare((api, options?: PluginOptions ) => {
   const debugEnabled = options?.debugEnabled ?? false;
   const t = api.types;
   let ignoreFile = false;
+
+
 
   return {
     name: "babel-plugin-mobx-observer-on-every-react-component",
@@ -100,7 +102,7 @@ export default declare((api, options?: PluginOptions ) => {
       },
 
       ArrowFunctionExpression(path, state) {
-        if (isInNodeModules(state) || ignoreFile) {
+        if (isInNodeModules(state) || ignoreFile || shouldIgnoreBlock(path)) {
           return;
         }
 
@@ -128,7 +130,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       ClassDeclaration(path, state) {
-        if (isInNodeModules(state) || ignoreFile) {
+        if (isInNodeModules(state) || ignoreFile || shouldIgnoreBlock(path)) {
           return;
         }
 
@@ -168,7 +170,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       ClassExpression(path, state) {
-        if (isInNodeModules(state) || ignoreFile) {
+        if (isInNodeModules(state) || ignoreFile || shouldIgnoreBlock(path)) {
           return;
         }
 
@@ -201,7 +203,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       FunctionDeclaration(path, state) {
-        if (isInNodeModules(state) || ignoreFile) {
+        if (isInNodeModules(state) || ignoreFile || shouldIgnoreBlock(path)) {
           return;
         }
 
@@ -256,7 +258,7 @@ export default declare((api, options?: PluginOptions ) => {
         }
       },
       FunctionExpression(path, state) {
-        if (isInNodeModules(state) || ignoreFile) {
+        if (isInNodeModules(state) || ignoreFile || shouldIgnoreBlock(path)) {
           return;
         }
 
@@ -426,6 +428,11 @@ function classHasRenderMethod(path: NodePath<t.ClassDeclaration | t.ClassExpress
   }
 
   return false;
+}
+
+function shouldIgnoreBlock(path: NodePath): boolean {
+  const comments = path.node.leadingComments || [];
+  return comments.some(comment => comment.value.trim() === '@auto-observer-ignore-block');
 }
 
 function debug(message: string, debugEnabled: boolean): void {

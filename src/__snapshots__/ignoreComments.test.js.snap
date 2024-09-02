@@ -1,0 +1,46 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mobx Observer Babel Plugin ignoreComments when the comment is to ignore the full file ignores everything in the file 1`] = `
+"// @auto-observer-ignore-file
+class MyComponentClassDeclaration {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+}
+const MyArrowObserver = () => /*#__PURE__*/React.createElement("div", null, "Hello World");
+const MyComponentClassExpression = class MyComponent {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+};
+function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+}
+const MyComponentExpression = function MyComponentExpression() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+};"
+`;
+
+exports[`Mobx Observer Babel Plugin ignoreComments when the comment is to ignore a specific block ignores the specific block 1`] = `
+"import { observer } from "mobx-react";
+// @auto-observer-ignore-block
+class MyComponentClassDeclaration {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+}
+const MyArrowObserver = observer(() => /*#__PURE__*/React.createElement("div", null, "Hello World"));
+const MyComponentClassExpression = observer(class MyComponent {
+  render() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  }
+});
+function MyComponentDeclaration() {
+  return observer(function MyComponentDeclaration() {
+    return /*#__PURE__*/React.createElement("div", null, "Hello World");
+  });
+}
+const MyComponentExpression = observer(function MyComponentExpression() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
+`;
