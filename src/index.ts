@@ -4,8 +4,12 @@ import { NodePath } from '@babel/core';
 import * as t from '@babel/types';
 import { PluginPass } from '@babel/core';
 
+/**
+ * Options for the plugin
+ */
 interface PluginOptions {
-  debugEnabled?: boolean;
+  // Default false, controls if we log debug statements during plugin execution. Mostly intended for plugin developers.
+  debugEnabled?: boolean; 
 }
 
 type BabelTypes = typeof import('@babel/types');
