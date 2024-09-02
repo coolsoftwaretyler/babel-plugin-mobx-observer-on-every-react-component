@@ -92,7 +92,17 @@ Here are some options we'll eventually add:
 
 ### Ignore files/lines
 
-**Coming soon**: eventually we'll have a syntax to ignore entire files or lines of code if you prefer to opt-out of plugin transformation.
+If you want to ignore an entire file, add a comment to the top of the file:
+
+```ts
+// @auto-observer-ignore-file
+```
+
+If you want to ignore a specific block, add a comment to the start of the block:
+
+```ts
+// @auto-observer-ignore-block
+```
 
 ## Examples
 
