@@ -245,8 +245,16 @@ export default declare((api, options?: PluginOptions ) => {
             t.variableDeclarator(functionId, observerFunction)
           ]);
 
-            path.replaceWith(variableDeclaration);
+          // now check to see if the function declaration is exported. If it is, we need to replace
+          // the functione with the observer-wrapped function and then export it
+          // If it's not exported, we can just replace the functoin with the variable declaration
+          if (path.parentPath.isExportDefaultDeclaration()) {
+            path.parentPath.replaceWith(t.exportDefaultDeclaration(observerFunction));
           } else {
+            path.replaceWith(variableDeclaration);
+          }
+
+        } else {
             // Replace the old function declaration with the new variable declaration
             path.replaceWith(observerFunction);
           }
