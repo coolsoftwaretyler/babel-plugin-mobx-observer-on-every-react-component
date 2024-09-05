@@ -8,20 +8,16 @@ exports[`Mobx Observer Babel Plugin observer imports when there is no observer i
 
 exports[`Mobx Observer Babel Plugin observer imports when there is no observer import and there are react components it adds an observer import 1`] = `
 "import { observer } from "mobx-react";
-function MyComponentDeclaration() {
-  return observer(function MyComponentDeclaration() {
-    return /*#__PURE__*/React.createElement("div", null, "Hello World");
-  });
-}"
+const MyComponentDeclaration = observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
 `;
 
 exports[`Mobx Observer Babel Plugin observer imports when there is no observer import and we have other imports from mobx-react it adds the observer import 1`] = `
 "import { inject, observer } from "mobx-react";
-function MyComponentDeclaration() {
-  return observer(function MyComponentDeclaration() {
-    return /*#__PURE__*/React.createElement("div", null, "Hello World");
-  });
-}"
+const MyComponentDeclaration = observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
 `;
 
 exports[`Mobx Observer Babel Plugin observer imports when there is already an observer import and no react components it does nothing 1`] = `
@@ -33,27 +29,21 @@ function MyFunctionDeclaration() {
 
 exports[`Mobx Observer Babel Plugin observer imports when there is already an observer import and react components but unwrapped it does not add the import, but wraps the component 1`] = `
 "import { observer } from "mobx-react";
-function MyComponentDeclaration() {
-  return observer(function MyComponentDeclaration() {
-    return /*#__PURE__*/React.createElement("div", null, "Hello World");
-  });
-}"
+const MyComponentDeclaration = observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
 `;
 
 exports[`Mobx Observer Babel Plugin observer imports when there is already an observer import and react components wrapped it takes no action 1`] = `
 "import { observer } from "mobx-react";
-function MyComponentDeclaration() {
-  return observer(function MyComponentDeclaration() {
-    return /*#__PURE__*/React.createElement("div", null, "Hello World");
-  });
-}"
+const MyComponentDeclaration = observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
 `;
 
 exports[`Mobx Observer Babel Plugin observer imports when there is already an observer import and we have other imports from mobx-react it does not add the observer import 1`] = `
 "import { observer, inject } from "mobx-react";
-function MyComponentDeclaration() {
-  return observer(function MyComponentDeclaration() {
-    return /*#__PURE__*/React.createElement("div", null, "Hello World");
-  });
-}"
+const MyComponentDeclaration = observer(function MyComponentDeclaration() {
+  return /*#__PURE__*/React.createElement("div", null, "Hello World");
+});"
 `;

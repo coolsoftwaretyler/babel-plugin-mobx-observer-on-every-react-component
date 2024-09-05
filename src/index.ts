@@ -239,17 +239,17 @@ export default declare((api, options?: PluginOptions ) => {
             functionExpression,
           ]);
 
-          // Create a new FunctionDeclaration with the same id and the observer-wrapped body
-          const newFunctionDeclaration = t.functionDeclaration(
-            functionId,
-            path.node.params,
-            t.blockStatement([t.returnStatement(observerFunction)]),
-            path.node.generator,
-            path.node.async
-          );
+          // If we have a function Id, we need to create a VariableDeclaration with the observer-wrapped function
+          if (functionId) {
+          const variableDeclaration = t.variableDeclaration("const", [
+            t.variableDeclarator(functionId, observerFunction)
+          ]);
 
-          // Replace the old function declaration with the new one
-          path.replaceWith(newFunctionDeclaration);
+            path.replaceWith(variableDeclaration);
+          } else {
+            // Replace the old function declaration with the new variable declaration
+            path.replaceWith(observerFunction);
+          }
         } else {
           debug(
             `not a react component ${path.node.id?.name ?? "Anonymous"}`,
