@@ -9,7 +9,9 @@ export default defineConfig({
     babel: {
       plugins: [
         [
-          "../dist/index.cjs.js",
+          "../dist/index.cjs.js", {
+            debugEnabled: true
+          }
         ]
       ]
     }
