@@ -2,6 +2,7 @@ import './App.css'
 import { makeAutoObservable } from "mobx";
 import FunctionDeclaration from "./FunctionDeclaration";
 import DefaultExportFunctionDeclaration from "./DefaultExportFunctionDeclaration";
+import { NamedExportFunctionDeclaration } from "./NamedExportFunctionDeclaration";
 
 class CounterStore {
   count = 0;
@@ -30,6 +31,7 @@ const App = function App() {
         <button onClick={() => counterStore.decrement()}>Decrement</button>
         <FunctionDeclaration />
         <DefaultExportFunctionDeclaration />
+        <NamedExportFunctionDeclaration />
       </div>
     </>
   )
